@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LGuardPD Diagnóstico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: calmo e direto, como um bom app de banco para pequeno negócio
+   IDEA: um check-up — perguntas simples, resultado em forma de selo de adequação
+   PICTURE: o próprio app: assistente em uma coluna, depois o selo com a nota
+   COLOUR and TYPE: branco, tinta escura, cobalto dominante, coral só para risco; Manrope
+   LAYOUT: coluna única de app, barra de progresso fixa, resultado em duas colunas no desktop */
+:root{color-scheme:light dark;
+--bg:light-dark(#ffffff,#0f1117);--ink:light-dark(#15171c,#eef0f4);--mute:light-dark(#5b6170,#a3a9b8);
+--line:light-dark(#e3e6ec,#262a35);--soft:light-dark(#f3f5f9,#171a23);
+--blue:light-dark(#1f4fd1,#6f93ff);--blueSoft:light-dark(#e8eefd,#1a2445);
+--coral:light-dark(#e5482b,#ff7a5f);--amber:light-dark(#b97400,#f0b544);--ok:light-dark(#1f8a5a,#4fd197)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Manrope,system-ui,sans-serif;overflow-x:clip}
+header{display:flex;align-items:center;gap:12px;padding:14px max(5vw,16px);border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:5}
+.logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:18px}
+.logo svg{width:28px;height:28px}
+.prog{flex:1;height:6px;background:var(--soft);border-radius:9px;overflow:hidden;max-width:420px;margin-left:auto}
+.prog i{display:block;height:100%;background:var(--blue);width:0;transition:width .3s}
+.step-l{font-size:13px;color:var(--mute);white-space:nowrap}
+main{max-width:720px;margin:0 auto;padding:clamp(24px,4vw,48px) max(5vw,16px) 64px}
+main.wide{max-width:1100px}
+h1{font-size:clamp(30px,5vw,44px);line-height:1.08;margin:0 0 12px;text-wrap:balance;letter-spacing:-.01em}
+h2{font-size:24px;line-height:1.2;margin:0 0 8px;text-wrap:balance}
+p.lead{font-size:17px;color:var(--mute);margin:0 0 24px;max-width:60ch}
+.small{font-size:13px;color:var(--mute)}
+label.f{display:block;font-weight:700;margin:18px 0 6px}
+input[type=text],input[type=email],select{width:100%;font:inherit;font-size:16px;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);min-height:48px}
+input:focus-visible,select:focus-visible,button:focus-visible,.opt:focus-within{outline:3px solid var(--blue);outline-offset:2px}
+.btns{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+button{font:inherit;font-weight:700;font-size:16px;min-height:48px;padding:0 22px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+button.pri{background:var(--blue);border-color:var(--blue);color:#fff}
+button:disabled{opacity:.45;cursor:not-allowed}
+.area{display:inline-block;font-size:13px;font-weight:700;color:var(--blue);background:var(--blueSoft);padding:4px 10px;border-radius:99px;margin-bottom:14px}
+.q{font-size:clamp(22px,3.4vw,28px);font-weight:800;line-height:1.2;margin:0 0 8px;text-wrap:balance}
+.why{color:var(--mute);margin:0 0 22px}
+.opts{display:grid;gap:10px}
+.opt{display:flex;gap:14px;align-items:center;padding:14px 16px;border:1.5px solid var(--line);border-radius:14px;cursor:pointer;min-height:56px}
+.opt input{width:20px;height:20px;accent-color:var(--blue);flex:none}
+.opt:has(input:checked){border-color:var(--blue);background:var(--blueSoft)}
+.opt b{display:block}.opt span{font-size:14px;color:var(--mute)}
+.res{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:clamp(20px,4vw,48px);align-items:start}
+.seal{background:var(--soft);border-radius:20px;padding:28px;text-align:center;position:sticky;top:84px}
+.ring{width:min(240px,70vw);aspect-ratio:1;margin:0 auto 10px;display:block}
+.score{font-size:clamp(48px,8vw,64px);font-weight:800}
+.risk{display:inline-block;font-weight:800;padding:6px 14px;border-radius:99px;color:#fff;margin:6px 0 18px}
+.bars{text-align:left;display:grid;gap:12px}
+.bar .t{display:flex;justify-content:space-between;font-size:14px;font-weight:700}
+.bar .tr{height:10px;background:var(--line);border-radius:9px;overflow:hidden;margin-top:4px}
+.bar .tr i{display:block;height:100%;border-radius:9px}
+.plan h3{font-size:18px;margin:26px 0 10px;display:flex;align-items:center;gap:10px}
+.plan h3 em{font-style:normal;font-size:13px;color:var(--mute);font-weight:500}
+.dot{width:12px;height:12px;border-radius:50%;flex:none}
+.item{display:flex;gap:12px;padding:14px 0;border-top:1px solid var(--line)}
+.item input{width:22px;height:22px;margin-top:2px;accent-color:var(--ok);flex:none}
+.item b{display:block}.item p{margin:2px 0 0;font-size:15px;color:var(--mute)}
+.item:has(input:checked) b{text-decoration:line-through;color:var(--mute)}
+.cta{margin-top:32px;padding:24px;border:2px solid var(--blue);border-radius:18px}
+.cta ul{margin:8px 0 16px;padding-left:20px}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row input{flex:1 1 220px}
+.note{font-size:13px;color:var(--mute);margin-top:10px}
+.toast{margin-top:12px;font-weight:700;color:var(--ok)}
+.hero{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:32px;align-items:center}
+.hero svg{width:100%;height:auto}
+.facts{display:flex;gap:20px;flex-wrap:wrap;margin:8px 0 0;padding:0;list-style:none;font-weight:700}
+.facts li{white-space:nowrap}
+@media(max-width:760px){.res,.hero{grid-template-columns:minmax(0,1fr)}.seal{position:static}.hero svg{max-width:260px;margin:0 auto;display:block}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 4 7v8c0 7.5 5 13 12 15 7-2 12-7.5 12-15V7z" fill="var(--blue)"/><path d="m10.5 16 4 4 7.5-8" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>LGuardPD</div>
+  <span class="step-l" id="stepL"></span>
+  <div class="prog" aria-hidden="true"><i id="progI"></i></div>
+</header>
+<main id="app"></main>
+<p class="small" style="text-align:center;padding:0 16px 24px">Protótipo de MVP para fins acadêmicos. Nenhum dado digitado sai do seu navegador.</p>
+
+<script>
+{
+const AREAS=["Coleta e finalidade","Armazenamento e segurança","Direitos do titular","Governança e incidentes"];
+const Q=[
+ {a:0,w:3,q:"Você pede só os dados que realmente usa?",why:"Ex.: pedir CPF só quando emite nota fiscal.",act:"Revise suas fichas e cadastros e retire campos que você não usa.",d:"Menos dados guardados, menos risco se algo vazar."},
+ {a:0,w:2,q:"Seus clientes sabem para que você usa os dados deles?",why:"Um aviso curto no balcão, no site ou na mensagem de boas-vindas do WhatsApp.",act:"Publique um aviso de privacidade curto.",d:"Usamos o modelo de 5 linhas do plano completo: o que coleta, para quê e como falar com você."},
+ {a:0,w:2,q:"Você pede autorização antes de mandar promoções?",why:"Mensagens de marketing por WhatsApp, SMS ou e-mail.",act:"Peça autorização para marketing e ofereça como sair da lista.",d:"Uma pergunta no cadastro (\"quer receber promoções?\") resolve."},
+ {a:1,w:3,q:"Os dados dos clientes ficam protegidos por senha?",why:"Computador, celular, planilha, sistema de agendamento, WhatsApp Business.",act:"Coloque senha e verificação em duas etapas em tudo que guarda dados.",d:"Comece pelo celular do negócio e pelo e-mail principal."},
+ {a:1,w:3,q:"Só quem precisa tem acesso a esses dados?",why:"Ex.: ex-funcionário que ainda entra na planilha ou no grupo.",act:"Revise quem tem acesso e remova ex-funcionários.",d:"Prefira um login por pessoa em vez de uma senha compartilhada."},
+ {a:1,w:2,q:"Você tem cópia de segurança (backup) dos dados?",why:"Se o celular quebrar ou for roubado, você perde os cadastros?",act:"Ative o backup automático na nuvem.",d:"Confira uma vez por mês se o backup está funcionando."},
+ {a:1,w:1,q:"Você apaga dados de quem não é mais cliente?",why:"Fichas antigas, contatos de anos atrás.",act:"Defina por quanto tempo guarda cada tipo de dado.",d:"Ex.: fichas de clientes inativos há 5 anos podem ser descartadas, salvo obrigação legal."},
+ {a:2,w:2,q:"Se um cliente pedir para ver ou apagar os dados dele, você sabe o que fazer?",why:"É um direito do titular previsto na LGPD.",act:"Tenha um roteiro de resposta a pedidos de clientes.",d:"Anote o pedido, confirme a identidade da pessoa e responda com o que você tem."},
+ {a:2,w:2,q:"Existe um contato divulgado para assuntos de privacidade?",why:"Pode ser o mesmo e-mail ou WhatsApp do negócio.",act:"Divulgue um canal de contato para privacidade.",d:"Pequenos negócios podem ter regras simplificadas, mas precisam de um canal para o titular."},
+ {a:3,w:1,q:"Você sabe quais fornecedores recebem dados dos seus clientes?",why:"Contador, sistema de agendamento, maquininha, loja virtual.",act:"Faça a lista de fornecedores que recebem dados.",d:"Uma tabela simples: fornecedor, que dados recebe, para quê."},
+ {a:3,w:2,q:"Sua equipe foi orientada sobre cuidados com dados?",why:"Ex.: não mandar foto de ficha por grupo, não deixar tela aberta.",act:"Faça uma conversa de 15 minutos com a equipe.",d:"Use a lista de 10 cuidados do plano completo e registre quem participou."},
+ {a:3,w:3,q:"Se houver um vazamento, você sabe o que fazer?",why:"Celular roubado, planilha enviada para a pessoa errada, invasão.",act:"Tenha um roteiro de resposta a incidentes.",d:"Inclui quando avisar os clientes afetados e a ANPD."}
+];
+const OPTS=[{v:2,t:"Sim",s:"Já faço isso"},{v:1,t:"Em parte",s:"Faço às vezes ou só em alguns casos"},{v:0,t:"Não / não sei",s:"Ainda não faço"}];
+const SEG=["Salão de beleza ou barbearia","Clínica, consultório ou estética","Loja física","Loja virtual","Escritório ou prestação de serviços","Outro"];
+const S={step:-1,emp:{nome:"",seg:"",func:"",saude:""},ans:Array(12).fill(null),t0:null,t1:null,lead:false};
+const app=document.getElementById("app"),stepL=document.getElementById("stepL"),progI=document.getElementById("progI");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function shield(){return `<svg viewBox="0 0 260 260" aria-hidden="true"><circle cx="130" cy="130" r="120" fill="var(--blueSoft)"/><path d="M130 40 60 68v52c0 46 30 80 70 94 40-14 70-48 70-94V68z" fill="var(--blue)"/><path d="M130 40v174c40-14 70-48 70-94V68z" fill="#000" opacity=".12"/><path d="m95 128 25 25 46-50" stroke="#fff" stroke-width="16" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`}
+
+function render(){
+ const total=14;let n=S.step<0?0:S.step+1;
+ progI.style.width=(n/total*100)+"%";
+ stepL.textContent=S.step<0?"":S.step===0?"Seu negócio":S.step<=12?`Pergunta ${S.step} de 12`:"Resultado";
+ app.className=S.step===13?"wide":"";
+ if(S.step<0)return intro();if(S.step===0)return empresa();if(S.step<=12)return pergunta(S.step-1);resultado();
+ window.scrollTo(0,0);
+}
+function intro(){
+ app.innerHTML=`<div class="hero"><div><h1>Sua empresa está de acordo com a LGPD?</h1>
+ <p class="lead">Responda 12 perguntas simples e receba uma nota de adequação e um plano do que fazer primeiro. Sem juridiquês.</p>
+ <ul class="facts"><li>12 perguntas</li><li>Cerca de 8 minutos</li><li>Grátis</li></ul>
+ <div class="btns"><button class="pri" id="go">Começar diagnóstico</button></div></div>${shield()}</div>`;
+ go.onclick=()=>{S.t0=Date.now();S.step=0;render()};
+}
+function empresa(){
+ const e=S.emp;
+ app.innerHTML=`<h2>Conte um pouco sobre o seu negócio</h2><p class="lead">Isso ajusta o plano de ação ao seu caso.</p>
+ <form id="fe"><label class="f" for="nome">Nome do negócio</label><input type="text" id="nome" value="${esc(e.nome)}" placeholder="Ex.: Studio Bela Pele" autocomplete="organization">
+ <label class="f" for="seg">Ramo</label><select id="seg"><option value="">Escolha</option>${SEG.map(s=>`<option ${s===e.seg?"selected":""}>${s}</option>`).join("")}</select>
+ <label class="f" for="func">Quantas pessoas trabalham com você?</label><select id="func"><option value="">Escolha</option>${["Só eu","2 a 5","6 a 20","Mais de 20"].map(s=>`<option ${s===e.func?"selected":""}>${s}</option>`).join("")}</select>
+ <label class="f" for="saude">Você guarda informações de saúde dos clientes? (alergias, histórico, fichas de anamnese)</label><select id="saude"><option value="">Escolha</option>${["Sim","Não"].map(s=>`<option ${s===e.saude?"selected":""}>${s}</option>`).join("")}</select>
+ <div class="btns"><button type="button" id="back">Voltar</button><button class="pri" id="nx" disabled>Continuar</button></div></form>`;
+ const f=["nome","seg","func","saude"].map(id=>document.getElementById(id));
+ const chk=()=>{f.forEach(x=>e[x.id]=x.value);nx.disabled=!(e.nome.trim()&&e.seg&&e.func&&e.saude)};
+ f.forEach(x=>x.oninput=chk);chk();
+ back.onclick=()=>{S.step=-1;render()};
+ fe.onsubmit=ev=>{ev.preventDefault();S.step=1;render()};
+}
+function pergunta(i){
+ const q=Q[i];
+ app.innerHTML=`<span class="area">${AREAS[q.a]}</span><p class="q">${q.q}</p><p class="why">${q.why}</p>
+ <fieldset style="border:0;padding:0;margin:0"><legend class="small" style="margin-bottom:8px">Escolha uma opção</legend><div class="opts">
+ ${OPTS.map(o=>`<label class="opt"><input type="radio" name="r" value="${o.v}" ${S.ans[i]===o.v?"checked":""}><div><b>${o.t}</b><span>${o.s}</span></div></label>`).join("")}</div></fieldset>
+ <div class="btns"><button id="back">Voltar</button><button class="pri" id="nx" ${S.ans[i]===null?"disabled":""}>${i===11?"Ver resultado":"Próxima"}</button></div>`;
+ app.querySelectorAll("input[name=r]").forEach(r=>r.onchange=()=>{S.ans[i]=+r.value;nx.disabled=false});
+ back.onclick=()=>{S.step--;render()};
+ nx.onclick=()=>{if(i===11)S.t1=Date.now();S.step++;render()};
+}
+function calc(){
+ let tot=0,max=0;const ar=AREAS.map(()=>({s:0,m:0}));
+ Q.forEach((q,i)=>{const v=S.ans[i]*q.w;tot+=v;max+=2*q.w;ar[q.a].s+=v;ar[q.a].m+=2*q.w});
+ let score=Math.round(tot/max*100);
+ const saude=S.emp.saude==="Sim";
+ const risk=score>=75?{t:"Risco baixo",c:"var(--ok)"}:score>=45?{t:"Risco moderado",c:"var(--amber)"}:{t:"Risco alto",c:"var(--coral)"};
+ if(saude&&score<75&&risk.t==="Risco moderado"){risk.t="Risco alto";risk.c="var(--coral)"}
+ const plan={sem:[],mes:[],dep:[]};
+ Q.forEach((q,i)=>{const v=S.ans[i];if(v===2)return;
+  const it={...q,saude:saude&&(q.a===1||i===11)};
+  if((q.w===3&&v===0)||(it.saude&&v===0))plan.sem.push(it);else if(q.w>=2||v===0)plan.mes.push(it);else plan.dep.push(it)});
+ return{score,risk,areas:ar.map(a=>Math.round(a.s/a.m*100)),plan,saude};
+}
+function ring(score,col){
+ const r=96,c=2*Math.PI*r,off=c*(1-score/100);
+ return `<svg class="ring" viewBox="0 0 240 240" role="img" aria-label="Nota ${score} de 100"><circle cx="120" cy="120" r="${r}" fill="none" stroke="var(--line)" stroke-width="20"/><circle cx="120" cy="120" r="${r}" fill="none" stroke="${col}" stroke-width="20" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${off}" transform="rotate(-90 120 120)"/><text x="120" y="128" text-anchor="middle" font-size="58" font-weight="800" fill="var(--ink)" font-family="Manrope,sans-serif">${score}</text><text x="120" y="160" text-anchor="middle" font-size="15" fill="var(--mute)" font-family="Manrope,sans-serif">de 100</text></svg>`;
+}
+function resultado(){
+ const R=calc(),min=Math.max(1,Math.round((S.t1-S.t0)/60000));
+ const col=a=>a>=75?"var(--ok)":a>=45?"var(--amber)":"var(--coral)";
+ const grp=(k,t,sub,c)=>R.plan[k].length?`<h3><span class="dot" style="background:${c}"></span>${t} <em>${sub}</em></h3>${R.plan[k].map(it=>`<label class="item"><input type="checkbox"><div><b>${it.act}</b><p>${it.d}${it.saude?" Prioridade maior porque você guarda dados de saúde.":""}</p></div></label>`).join("")}`:"";
+ const vazio=!R.plan.sem.length&&!R.plan.mes.length&&!R.plan.dep.length;
+ app.innerHTML=`<h1>Diagnóstico de ${esc(S.emp.nome)}</h1><p class="lead">${esc(S.emp.seg)} · ${esc(S.emp.func)} · concluído em cerca de ${min} min</p>
+ <div class="res"><div class="seal">${ring(R.score,R.risk.c)}<span class="risk" style="background:${R.risk.c}">${R.risk.t}</span>
+ <div class="bars">${AREAS.map((a,i)=>`<div class="bar"><div class="t"><span>${a}</span><span>${R.areas[i]}</span></div><div class="tr"><i style="width:${R.areas[i]}%;background:${col(R.areas[i])}"></i></div></div>`).join("")}</div>
+ ${R.saude?`<p class="note">Dados de saúde são dados sensíveis na LGPD e pedem mais cuidado.</p>`:""}</div>
+ <div class="plan"><h2>Seu plano de ação</h2><p class="small">Marque o que já fez. A ordem considera o risco de cada item.</p>
+ ${vazio?`<p>Parabéns: você respondeu "Sim" para tudo. Revise o diagnóstico a cada 6 meses.</p>`:grp("sem","Esta semana","o mais urgente","var(--coral)")+grp("mes","Este mês","importante","var(--amber)")+grp("dep","Depois","para completar","var(--ok)")}
+ <div class="btns"><button id="cp">Copiar plano</button><button id="rf">Refazer</button></div><p class="toast" id="cpt" aria-live="polite"></p>
+ <div class="cta"><h2>Quer o plano completo?</h2><ul><li>Modelos prontos: aviso de privacidade, roteiro de incidentes, termo para equipe</li><li>Lembretes mensais e acompanhamento da sua nota</li><li>Inventário de dados guiado</li></ul>
+ <p style="margin:0 0 12px"><b>R$ 39 por mês</b>, cancele quando quiser.</p>
+ ${S.lead?`<p class="toast">Pronto! Você está na lista de pré-venda. Avisaremos no lançamento.</p>`:`<form id="fl" class="row"><label class="f" for="ct" style="flex-basis:100%;margin:0">Seu e-mail ou WhatsApp</label><input type="text" id="ct" placeholder="voce@email.com" autocomplete="email"><button class="pri">Quero entrar na pré-venda</button></form>`}
+ <p class="note">Teste de interesse: nada é cobrado nem enviado neste protótipo.</p></div></div></div>`;
+ rf.onclick=()=>{S.ans.fill(null);S.lead=false;S.step=-1;render()};
+ cp.onclick=async()=>{const txt=`Plano LGPD — ${S.emp.nome} (nota ${R.score}/100)\n`+["sem","mes","dep"].flatMap(k=>R.plan[k].map(it=>`- ${it.act}`)).join("\n");
+  try{await navigator.clipboard.writeText(txt);cpt.textContent="Plano copiado."}catch(e){cpt.textContent="Não foi possível copiar aqui."}};
+ const fl=document.getElementById("fl");if(fl)fl.onsubmit=ev=>{ev.preventDefault();if(ct.value.trim().length<5){ct.focus();return}S.lead=true;resultado()};
+}
+render();
+}
+</script>
+</body>
+</html>
